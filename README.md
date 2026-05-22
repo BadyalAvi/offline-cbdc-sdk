@@ -177,6 +177,34 @@ See **[DEVOPS.md](DEVOPS.md)** for:
 - **Environment Isolation** - Secrets managed via environment variables
 - **Health Checks** - Built-in liveness/readiness probes
 
+## 🧠 Algorithmic Innovation: Bypassing NFC Hardware Limits
+
+**The Problem (The 256-Byte Wall):**
+To ensure true zero-trust offline security, every e-Rupee transaction in this application is signed using dynamic Ed25519 cryptography. However, adding these massive cryptographic signatures and chronological hardware timestamps inflated our JSON payloads well beyond the **256-byte buffer limit** of standard high-frequency ISO-DEP NFC radios. 
+
+When broadcasting between devices, the hardware physically dropped the second half of our data packets mid-air, resulting in fatal `JSON.parse()` truncation errors on the receiving device.
+
+**The Solution (Payload Compression Tunnel):**
+Instead of compromising on cryptographic security or building sluggish multi-packet chunking loops in the native Java layer, we engineered a real-time **Payload Compression Tunnel** inside our React Native logic, right before the native hardware bridge.
+
+Before the radio broadcast, our algorithm dynamically tokenizes large JSON keys into lightweight, single-character identifiers:
+
+```json
+// ❌ Before Compression (Over 256 bytes -> Hardware Drops Packet)
+{
+  "transaction_type": "CBDC_PAYMENT",
+  "wallet_identification_number": "WLT-8472",
+  "transaction_amount": 500,
+  "cryptographic_signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855..."
+}
+
+// ✅ After Compression (Under 256 bytes -> Flawless Hardware Transmission)
+{
+  "T": "CBDC_PAYMENT",
+  "I": "WLT-8472",
+  "A": 500,
+  "S": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855..."
+}
 ---
 
 ## 📡 API Reference
